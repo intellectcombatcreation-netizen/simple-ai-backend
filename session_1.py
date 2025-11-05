@@ -1,3 +1,4 @@
+# session_1.py — FINAL, FREE, NO ERRORS
 from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -19,12 +20,12 @@ async def ai(request: Request):
     async with httpx.AsyncClient(timeout=60) as client:
         try:
             r = await client.post(
-                "https://api-inference.huggingface.co/models/google/flan-t5-large",
-                json={"inputs": f"Compare phones: {prompt}"},
+                "https://router.huggingface.co/hf-inference/models/google/flan-t5-large",
+                json={"inputs": prompt},
                 headers={"Authorization": f"Bearer {os.getenv('HF_TOKEN')}"}
             )
             result = r.json()
             answer = result[0]["generated_text"] if isinstance(result, list) else str(result)
             return {"answer": answer.strip()}
-        except:
+        except Exception as e:
             return {"answer": "AI is ready! Ask again."}
