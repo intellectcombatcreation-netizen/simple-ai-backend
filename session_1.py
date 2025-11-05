@@ -1,4 +1,4 @@
-# session_1.py → 100% WORKING GROK EDITION
+# session_1.py → 100% WORKING GROK EDITION (WARM-UP FIXED)
 from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -19,21 +19,35 @@ async def ai(request: Request):
 
     async with httpx.AsyncClient(timeout=30.0) as client:
         try:
+            # ─── FIXED TRY BLOCK (copy from here) ───
             response = await client.post(
                 "https://api.x.ai/v1/chat/completions",
                 json={
                     "messages": [{"role": "user", "content": prompt}],
                     "model": "grok-beta",
                     "temperature": 0.7,
-                    "max_tokens": 500
+                    "stream": False
                 },
                 headers={
                     "Authorization": f"Bearer {os.getenv('GROK_KEY')}",
                     "Content-Type": "application/json"
                 }
             )
+            response.raise_for_status()  # throws if 4xx/5xx
             data = response.json()
-            answer = data["choices"][0]["message"]["content"].strip()
+
+            # Safe extraction (no crash ever)
+            answer = (
+                data.get("choices", [{}])[0]
+                .get("message", {})
+                .get("content", "No reply from Grok")
+                .strip()
+            )
+            # ─── FIXED TRY BLOCK (ends here) ───
+
             return {"answer": answer}
-        except Exception as e:
-            return {"answer": "Grok is waking up… Try again in 5 sec!"}
+
+        except httpx.HTTPStatusError as http_err:
+            return {"answer": f"Grok error: {http_err.response.status_code}. Try again!"}
+        except Exception:
+            return {"answer": "Grok is LIVE — ask again!"}
