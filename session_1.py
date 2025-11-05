@@ -1,4 +1,3 @@
-# session_1.py — FINAL, FREE, NO ERRORS
 from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -6,26 +5,59 @@ import httpx
 import os
 
 app = FastAPI()
-app.add_middleware(CORSMiddleware, allow_origins=["*"])
 
+# ✅ CORS FIX (required for frontend to call backend)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# ✅ Serve your HTML file
 @app.get("/")
-async def root():
+async def serve_home():
     return FileResponse("session_1.html")
+
+
+# ✅ HF Endpoint
+HF_URL = "https://api-inference.huggingface.co/models/google/flan-t5-large"
+
 
 @app.post("/api/ai")
 async def ai(request: Request):
     body = await request.json()
-    prompt = body.get("prompt", "Hello")
+    prompt = body.get("prompt", "")
 
-    async with httpx.AsyncClient(timeout=60) as client:
+    # ✅ Load token
+    token = os.getenv("HF_TOKEN")
+    if not token:
+        print("ERROR: HF_TOKEN not found in environment!")
+        return {"answer": "Backend error: HF token missing"}
+
+    async with httpx.AsyncClient(timeout=80) as client:
         try:
+            # ✅ Make HF request
             r = await client.post(
-                "https://router.huggingface.co/hf-inference/models/google/flan-t5-large",
-                json={"inputs": prompt},
-                headers={"Authorization": f"Bearer {os.getenv('HF_TOKEN')}"}
+                HF_URL,
+                json={"inputs": f"Compare phones: {prompt}"},
+                headers={"Authorization": f"Bearer {token}"},
             )
+
+            print("\n--------- HF RAW RESPONSE ---------")
+            print(r.text)
+            print("----------------------------------\n")
+
             result = r.json()
-            answer = result[0]["generated_text"] if isinstance(result, list) else str(result)
-            return {"answer": answer.strip()}
+
+            # ✅ HF sometimes returns dict, sometimes list
+            if isinstance(result, list) and "generated_text" in result[0]:
+                return {"answer": result[0]["generated_text"].strip()}
+
+            # ✅ Send full error to frontend if HF fails
+            return {"answer": f"HF Error: {result}"}
+
         except Exception as e:
-            return {"answer": "AI is ready! Ask again."}
+            print("ERROR:", e)
+            return {"answer": "Backend error: HF request failed"}
