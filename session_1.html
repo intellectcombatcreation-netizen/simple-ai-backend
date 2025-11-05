@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TechSearch AI – NITHIN SURESH</title>
+    <style>
+      :root {
+        --bg: #0f0f23;
+        --card: #1a1a2e;
+        --accent: #8b5cf6;
+        --text: #e2e8f0;
+        --light: #94a3b8;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: 'Segoe UI', sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 2rem 1rem;
+        line-height: 1.6;
+      }
+      h1 {
+        font-size: 2.8rem;
+        background: linear-gradient(90deg, #8b5cf6, #3b82f6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+      }
+      .tagline {
+        color: var(--light);
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+      }
+      .box {
+        width: 100%;
+        max-width: 720px;
+        background: var(--card);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+        border: 1px solid rgba(139,92,246,0.2);
+      }
+      input {
+        width: 100%;
+        padding: 1rem 1.2rem;
+        font-size: 1.1rem;
+        background: #16213e;
+        border: 2px solid #334155;
+        border-radius: 1rem;
+        color: white;
+        outline: none;
+        transition: 0.3s;
+      }
+      input:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 4px rgba(139,92,246,0.25);
+      }
+      button {
+        margin-top: 1rem;
+        width: 100%;
+        padding: 1rem;
+        font-size: 1.2rem;
+        font-weight: 600;
+        background: var(--accent);
+        color: white;
+        border: none;
+        border-radius: 1rem;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(139,92,246,0.4);
+      }
+      #result {
+        margin-top: 1.5rem;
+        padding: 1.5rem;
+        background: #16213e;
+        border-radius: 1rem;
+        font-size: 1.2rem;
+        min-height: 120px;
+        border-left: 5px solid var(--accent);
+      }
+      .loading { color: var(--light); font-style: italic; }
+      footer {
+        margin-top: 3rem;
+        font-size: 0.9rem;
+        color: var(--light);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="box">
+      <h1>TechSearch AI</h1>
+      <p class="tagline">Ask anything – get instant phone comparisons</p>
+
+      <input
+        type="text"
+        id="prompt"
+        placeholder="e.g. Pixel 9 vs iPhone 16 for coding..."
+        onkeydown="if(event.key==='Enter') ask()"
+      />
+
+      <button onclick="ask()">ASK AI</button>
+
+      <div id="result" class="loading">Type your question and press ASK AI →</div>
+    </div>
+
+    <footer>Made by NITHIN SURESH – 16yo founder</footer>
+
+    <script>
+      async function ask() {
+        const prompt = document.getElementById('prompt').value.trim();
+        if (!prompt) return;
+
+        const result = document.getElementById('result');
+        result.innerHTML = '<span class="loading">Thinking…</span>';
+
+        try {
+          const res = await fetch('/api/ai', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt })
+          });
+
+          if (!res.ok) throw new Error('Server error');
+
+          const data = await res.json();
+          result.innerHTML = `<strong style="color:#8b5cf6">AI:</strong> ${data.answer}`;
+        } catch (e) {
+          result.innerHTML = '<span style="color:#ef4444">Refresh and try again</span>';
+        }
+      }
+    </script>
+  </body>
+</html>
