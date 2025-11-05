@@ -20,7 +20,7 @@ async def ai(request: Request):
     async with httpx.AsyncClient(timeout=60) as client:
         try:
             r = await client.post(
-                "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2",
+                "https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2",
                 json={"inputs": f"[INST] {prompt} [/INST]"},
                 headers={"Authorization": "Bearer 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"}
             )
@@ -38,3 +38,4 @@ async def ai(request: Request):
             return {"answer": answer or "Thinking…"}
         except Exception as e:
             return {"answer": "AI woke up! Ask again."}
+
