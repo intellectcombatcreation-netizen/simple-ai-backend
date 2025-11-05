@@ -1,4 +1,4 @@
-# session_1.py  ←  UNKILLABLE EDITION
+# session_1.py → 100% WORKING GROK EDITION
 from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -17,20 +17,23 @@ async def ai(request: Request):
     body = await request.json()
     prompt = body.get("prompt", "Hello")
 
-    async with httpx.AsyncClient(timeout=60.0) as client:
+    async with httpx.AsyncClient(timeout=30.0) as client:
         try:
-            r = await client.post(
-                "https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2",
-                json={"inputs": f"[INST] {prompt} [/INST]"},
-                headers={"Authorization": f"Bearer {os.getenv('HF_TOKEN')}"}
+            response = await client.post(
+                "https://api.x.ai/v1/chat/completions",
+                json={
+                    "messages": [{"role": "user", "content": prompt}],
+                    "model": "grok-beta",
+                    "temperature": 0.7,
+                    "max_tokens": 500
+                },
+                headers={
+                    "Authorization": f"Bearer {os.getenv('GROK_KEY')}",
+                    "Content-Type": "application/json"
+                }
             )
-            result = r.json()
-
-            if "error" in result:
-                return {"answer": f"AI says: {result['error'][:100]}… Refresh & retry!"}
-
-            text = result[0]["generated_text"] if isinstance(result, list) else result
-            answer = text.split("[/INST]")[-1].replace(prompt, "").strip()
-            return {"answer": answer or "Thinking…"}
+            data = response.json()
+            answer = data["choices"][0]["message"]["content"].strip()
+            return {"answer": answer}
         except Exception as e:
-            return {"answer": "AI is warming up! Ask again in 5 sec."}
+            return {"answer": "Grok is waking up… Try again in 5 sec!"}
