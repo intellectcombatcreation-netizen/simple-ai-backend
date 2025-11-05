@@ -1,9 +1,9 @@
-# session_1.py  ←  FIXED FOREVER
+# session_1.py  ←  UNKILLABLE EDITION
 from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 import httpx
-import json
+import os
 
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"])
@@ -17,25 +17,20 @@ async def ai(request: Request):
     body = await request.json()
     prompt = body.get("prompt", "Hello")
 
-    async with httpx.AsyncClient(timeout=60) as client:
+    async with httpx.AsyncClient(timeout=60.0) as client:
         try:
             r = await client.post(
                 "https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2",
                 json={"inputs": f"[INST] {prompt} [/INST]"},
-                headers={"Authorization": "Bearer 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"}
+                headers={"Authorization": f"Bearer {os.getenv('HF_TOKEN')}"}
             )
             result = r.json()
 
-            # FIXED THIS PART ↓↓↓
-            if isinstance(result, list) and len(result) > 0:
-                text = result[0].get("generated_text", "")
-            elif isinstance(result, dict) and "error" in result:
-                return {"answer": f"AI busy: {result['error']}. Try again!"}
-            else:
-                text = json.dumps(result)
+            if "error" in result:
+                return {"answer": f"AI says: {result['error'][:100]}… Refresh & retry!"}
 
+            text = result[0]["generated_text"] if isinstance(result, list) else result
             answer = text.split("[/INST]")[-1].replace(prompt, "").strip()
             return {"answer": answer or "Thinking…"}
         except Exception as e:
-            return {"answer": "AI woke up! Ask again."}
-
+            return {"answer": "AI is warming up! Ask again in 5 sec."}
