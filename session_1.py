@@ -22,7 +22,7 @@ async def serve_home():
 
 
 # ✅ HF Endpoint
-HF_URL = "https://api-inference.huggingface.co/models/google/flan-t5-large"
+HF_URL = "https://router.huggingface.co/hf-inference/models/google/flan-t5-large"
 
 
 @app.post("/api/ai")
@@ -61,3 +61,4 @@ async def ai(request: Request):
         except Exception as e:
             print("ERROR:", e)
             return {"answer": "Backend error: HF request failed"}
+
