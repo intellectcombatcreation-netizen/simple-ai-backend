@@ -1,108 +1,35 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>TechSearch AI – NITHIN SURESH</title>
+  <title>TechSearch AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body {
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%);
-      color: #e2e8f0;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 2rem;
-    }
-    h1 {
-      font-size: 2.8rem;
-      background: linear-gradient(90deg, #8b5cf6, #3b82f6);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 1rem;
-    }
-    .box {
-      width: 100%;
-      max-width: 720px;
-      background: rgba(30,41,59,0.7);
-      backdrop-filter: blur(12px);
-      border-radius: 24px;
-      padding: 2.5rem;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-      border: 1px solid rgba(139,92,246,0.2);
-    }
-    input {
-      width: 100%;
-      padding: 1.2rem 1.5rem;
-      font-size: 1.2rem;
-      background: #16213e;
-      border: 2px solid #334155;
-      border-radius: 16px;
-      color: white;
-      outline: none;
-      transition: 0.3s;
-    }
-    input:focus { border-color: #8b5cf6; box-shadow: 0 0 0 4px rgba(139,92,246,0.3); }
-    button {
-      margin-top: 1rem;
-      width: 100%;
-      padding: 1.2rem;
-      font-size: 1.3rem;
-      font-weight: 600;
-      background: linear-gradient(135deg, #8b5cf6, #6366f1);
-      color: white;
-      border: none;
-      border-radius: 16px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    button:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(139,92,246,0.4); }
-    #result {
-      margin-top: 2rem;
-      padding: 2rem;
-      background: #16213e;
-      border-radius: 16px;
-      font-size: 1.4rem;
-      line-height: 1.7;
-      min-height: 120px;
-      border-left: 6px solid #8b5cf6;
-    }
-    footer { margin-top: 3rem; font-size: 0.9rem; color: #64748b; }
+    body { font-family: Arial; background: #0f0f23; color: white; text-align: center; padding: 2rem; }
+    h1 { font-size: 3rem; background: linear-gradient(90deg, #8b5cf6, #3b82f6); -webkit-background-clip: text; color: transparent; }
+    input, button { width: 80%; max-width: 600px; padding: 1rem; margin: 1rem; font-size: 1.2rem; border-radius: 12px; border: none; }
+    input { background: #1e293b; color: white; }
+    button { background: #8b5cf6; color: white; cursor: pointer; }
+    #result { margin: 2rem; padding: 2rem; background: #1e293b; border-radius: 16px; font-size: 1.3rem; min-height: 100px; border-left: 6px solid #8b5cf6; }
   </style>
 </head>
 <body>
-  <div class="box">
-    <h1>TechSearch AI</h1>
-    <p style="text-align:center;margin-bottom:2rem;color:#94a3b8;">
-      Powered by Grok (xAI) – Instant phone comparisons
-    </p>
-    <input type="text" id="prompt" placeholder="Pixel 9 vs iPhone 16 for coding..." onkeydown="if(event.key==='Enter')ask()" />
-    <button onclick="ask()">ASK GROK</button>
-    <div id="result">Type your question → hit Enter or click button</div>
-  </div>
-  <footer>Made by NITHIN SURESH – 16yo founder</footer>
+  <h1>TechSearch AI</h1>
+  <input id="prompt" placeholder="Pixel 9 vs iPhone 16..." onkeydown="if(event.key==='Enter')ask()">
+  <button onclick="ask()">ASK AI</button>
+  <div id="result">Type and press Enter →</div>
 
   <script>
     async function ask() {
-      const prompt = document.getElementById('prompt').value.trim();
-      if (!prompt) return;
-      const result = document.getElementById('result');
-      result.innerHTML = 'Grok is thinking…';
-
-      try {
-        const res = await fetch('/api/ai', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt })
-        });
-        const data = await res.json();
-        result.innerHTML = `<strong style="color:#8b5cf6">Grok:</strong> ${data.answer.replace(/\n/g, '<br>')}`;
-      } catch (e) {
-        result.innerHTML = 'Refresh & try again!';
-      }
+      const p = document.getElementById('prompt').value;
+      if (!p) return;
+      document.getElementById('result').innerHTML = 'Thinking...';
+      const res = await fetch('/api/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: p })
+      });
+      const data = await res.json();
+      document.getElementById('result').innerHTML = '<strong>AI:</strong> ' + data.answer;
     }
   </script>
 </body>
